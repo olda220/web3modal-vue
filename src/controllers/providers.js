@@ -22,7 +22,7 @@ export class ProviderController {
         this.providerOptions = opts.providerOptions;
         this.network = opts.network;
         this.injectedProvider = getInjectedProvider();
-
+        this.provider = null;
 
         this.providers = Object.keys(list.connectors).map((id) => {
             let providerInfo;
@@ -162,6 +162,15 @@ export class ProviderController {
     }
 
     clearCachedProvider() {
+        if(this.provider != null){
+            if(this.provider.constructor.name == "WebsocketProvider" && this.provider.connected){
+                this.provider.disconnect();
+            }
+            if(this.provider.constructor.name == "WalletConnectProvider" && this.provider.connected){
+                this.provider.disconnect();
+            }
+        }
+
         this.cachedProvider = "";
         removeLocal(CACHED_PROVIDER_KEY);
     }
@@ -177,6 +186,7 @@ export class ProviderController {
             const providerOptions = this.getProviderOption(id, "options");
             const opts = {network: this.network || undefined, ...providerOptions};
             const provider = await connector(providerPackage, opts);
+            this.provider = provider;
             this.eventController.trigger(CONNECT_EVENT, provider);
             if (this.shouldCacheProvider && this.cachedProvider !== id) {
                 this.setCachedProvider(id);

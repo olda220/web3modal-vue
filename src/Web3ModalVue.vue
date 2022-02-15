@@ -4,7 +4,7 @@
       :theme-colors="themeColors"
       :user-options="userOptions"
       :lightbox-opacity="lightboxOpacity"
-      @onClose="_toggleModal"
+      @onClose="hideModal()"
   />
 </template>
 
@@ -16,7 +16,7 @@ import {getThemeColors} from "./helpers";
 
 import {themesList} from "./themes";
 import Modal from "./components/Modal.vue";
-
+var actualProvider = null;
 export default {
   name: "Web3ModalVue",
   components: {Modal},
@@ -77,12 +77,26 @@ export default {
     },
   },
   methods: {
+    disconnect() {
+      actualProvider = null;
+    },
     connect() {
       return new Promise((resolve, reject) => {
-        this.on(CONNECT_EVENT, provider => resolve(provider));
+        if(actualProvider){
+          resolve(actualProvider)
+          this.hideModal();
+        } else {
+          this.on(CONNECT_EVENT, provider => resolve(provider));
+        }
         this.on(ERROR_EVENT, error => reject(error));
         this.on(CLOSE_EVENT, () => reject("Modal closed by user"));
-        this.toggleModal();
+        if (this.cachedProvider) {
+          console.log("ano", this.cachedProvider, typeof this.cachedProvider);
+          this.providerController.connectToCachedProvider();
+          return;
+        }
+        this.hideModal();
+        //this.toggleModal();
       });
     },
     connectTo(id) {
@@ -102,15 +116,17 @@ export default {
       });
     },
     toggleModal() {
-      if (this.cachedProvider) {
+      this.showModal();
+      /*if (this.cachedProvider) {
+        console.log("ano", this.cachedProvider, typeof this.cachedProvider);
         this.providerController.connectToCachedProvider();
         return;
-      }
+      }*/
       /*if (this.userOptions && this.userOptions.length === 1 && this.userOptions[0].name) {
         this.userOptions[0].onClick();
         return;
       }*/
-      this._toggleModal();
+      //this._toggleModal();
     },
     on(event, callback) {
       this.eventController.on({event, callback});
@@ -127,6 +143,14 @@ export default {
     },
     updateTheme(theme) {
       this.themeColors = getThemeColors(theme);
+    },
+    hideModal() {
+      this.show = true;
+      this._toggleModal();
+    },
+    showModal() {
+      this.show = false;
+      this._toggleModal();
     },
     _toggleModal() {
       const d = typeof window !== "undefined" ? document : "";
@@ -147,14 +171,16 @@ export default {
       this.eventController.trigger(ERROR_EVENT, error);
     },
     onConnect(provider) {
-      if (this.show) {
+      /*if (this.show) {
         this._toggleModal();
-      }
+      }*/
+      this.hideModal();
+      actualProvider = provider;
       this.eventController.trigger(CONNECT_EVENT, provider);
     },
     onClose() {
       if (this.show) {
-        this._toggleModal();
+        this.hideModal();
       }
       this.eventController.trigger(CLOSE_EVENT);
     }
