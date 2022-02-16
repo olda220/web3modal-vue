@@ -162,7 +162,7 @@ export class ProviderController {
     }
 
     clearCachedProvider() {
-        if(this.provider != null && typeof this.provider.disconnect != "undefined" && this.provider.connected)
+        if(this.provider != null && typeof this.provider.disconnect != "undefined" && this.provider.connected){
             this.provider.disconnect();
         }
 
