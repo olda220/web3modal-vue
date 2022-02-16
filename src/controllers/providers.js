@@ -162,13 +162,8 @@ export class ProviderController {
     }
 
     clearCachedProvider() {
-        if(this.provider != null){
-            if(this.provider.constructor.name == "WebsocketProvider" && this.provider.connected){
-                this.provider.disconnect();
-            }
-            if(this.provider.constructor.name == "WalletConnectProvider" && this.provider.connected){
-                this.provider.disconnect();
-            }
+        if(this.provider != null && typeof this.provider.disconnect != "undefined" && this.provider.connected)
+            this.provider.disconnect();
         }
 
         this.cachedProvider = "";
