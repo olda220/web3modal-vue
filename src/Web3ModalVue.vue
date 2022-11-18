@@ -90,8 +90,7 @@ export default {
         }
         this.on(ERROR_EVENT, error => reject(error));
         this.on(CLOSE_EVENT, () => reject("Modal closed by user"));
-        if (this.cachedProvider) {
-          console.log("ano", this.cachedProvider, typeof this.cachedProvider);
+        if (this.cachedProvider) {          
           this.providerController.connectToCachedProvider();
           return;
         }
@@ -117,8 +116,7 @@ export default {
     },
     toggleModal() {
       this.showModal();
-      /*if (this.cachedProvider) {
-        console.log("ano", this.cachedProvider, typeof this.cachedProvider);
+      /*if (this.cachedProvider) {        
         this.providerController.connectToCachedProvider();
         return;
       }*/
